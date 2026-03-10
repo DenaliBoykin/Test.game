@@ -11,8 +11,8 @@ const JUMP_FORCE = -14;
 const OBSTACLE_SPEED_START = 6;
 const MIN_OBSTACLE_GAP = 200;
 const MAX_OBSTACLE_GAP = 300;
-const SPEED_INCREASE_INTERVAL = 10;
-const SPEED_INCREASE_FACTOR = 1.08;
+const SPEED_INCREASE_INTERVAL = 5;
+const SPEED_INCREASE_FACTOR = 1.12;
 
 let score = 0;
 let gameOver = false;

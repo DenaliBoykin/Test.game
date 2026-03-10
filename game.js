@@ -11,8 +11,6 @@ const JUMP_FORCE = -14;
 const OBSTACLE_SPEED_START = 6;
 const MIN_OBSTACLE_GAP = 200;
 const MAX_OBSTACLE_GAP = 300;
-const SPEED_INCREASE_INTERVAL = 5;
-const SPEED_INCREASE_FACTOR = 1.12;
 
 let score = 0;
 let gameOver = false;
@@ -130,8 +128,8 @@ function updateObstacles() {
         highScoreEl.textContent = `High Score: ${highScore}`;
       }
 
-      if (score % SPEED_INCREASE_INTERVAL === 0) {
-        obstacleSpeed *= SPEED_INCREASE_FACTOR;
+      if (score % 5 === 0) {
+        obstacleSpeed *= 1.12;
       }
     }
   }

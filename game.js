@@ -4,7 +4,6 @@ const ctx = canvas.getContext("2d");
 const scoreEl = document.getElementById("score");
 const highScoreEl = document.getElementById("highScore");
 const statusEl = document.getElementById("status");
-const pauseBtn = document.getElementById("pauseBtn");
 
 const GRAVITY = 0.8;
 const GROUND_Y = 320;
@@ -39,6 +38,18 @@ const player = {
 
 const obstacles = [];
 
+function publishGameState() {
+  window.dispatchEvent(
+    new CustomEvent("runner:state", {
+      detail: {
+        paused,
+        gameOver,
+        status: statusEl.textContent
+      }
+    })
+  );
+}
+
 function resetGame() {
   score = 0;
   gameOver = false;
@@ -56,20 +67,25 @@ function resetGame() {
   scoreEl.textContent = "Score: 0";
   highScoreEl.textContent = `High Score: ${highScore}`;
   statusEl.textContent = "Running";
-  pauseBtn.textContent = "Pause";
+  publishGameState();
 }
 
 function togglePause() {
   if (gameOver) {
-    return;
+    return false;
   }
 
   paused = !paused;
   statusEl.textContent = paused ? "Paused" : "Running";
-  pauseBtn.textContent = paused ? "Resume" : "Pause";
+  publishGameState();
+  return paused;
 }
 
-pauseBtn.addEventListener("click", togglePause);
+window.runnerGame = {
+  togglePause,
+  isPaused: () => paused,
+  isGameOver: () => gameOver
+};
 
 function jump() {
   if (paused) {
@@ -101,12 +117,6 @@ document.addEventListener("keydown", (e) => {
   if (e.code === "Space") {
     e.preventDefault();
     queueJump();
-    return;
-  }
-
-  if (e.code === "KeyP") {
-    e.preventDefault();
-    togglePause();
   }
 });
 
@@ -198,8 +208,8 @@ function detectCollisions() {
     if (hit) {
       gameOver = true;
       paused = false;
-      pauseBtn.textContent = "Pause";
       statusEl.textContent = "Game Over - Press Space to Restart";
+      publishGameState();
       break;
     }
   }
@@ -229,38 +239,31 @@ function drawPlayer() {
   const legOffset = isRunning ? Math.sin(runCycle) * 4 : 0;
   const armOffset = isRunning ? Math.cos(runCycle) * 3 : 0;
 
-  // Shadow
   ctx.fillStyle = "rgba(0, 0, 0, 0.35)";
   ctx.beginPath();
   ctx.ellipse(x + 25, GROUND_Y + 5, 20, 7, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // Legs
   ctx.fillStyle = "#1f1f26";
   ctx.fillRect(x + 12, y + 46 + legOffset, 11, 24 - legOffset);
   ctx.fillRect(x + 27, y + 46 - legOffset, 11, 24 + legOffset);
 
-  // Shoes
   ctx.fillStyle = "#f5f5f5";
   ctx.fillRect(x + 10, y + 66 + legOffset, 14, 4);
   ctx.fillRect(x + 25, y + 66 - legOffset, 14, 4);
 
-  // Jacket
   const jacketGradient = ctx.createLinearGradient(x + 6, y + 22, x + 44, y + 48);
   jacketGradient.addColorStop(0, "#f7f7f7");
   jacketGradient.addColorStop(1, "#d8d8d8");
   ctx.fillStyle = jacketGradient;
   ctx.fillRect(x + 8, y + 22, 34, 26);
 
-  // Arms
   ctx.fillStyle = "#5b3c2d";
   ctx.fillRect(x + 4, y + 25 - armOffset, 6, 19);
   ctx.fillRect(x + 40, y + 25 + armOffset, 6, 19);
 
-  // Neck
   ctx.fillRect(x + 21, y + 18, 8, 6);
 
-  // Head
   const skinGradient = ctx.createRadialGradient(x + 24, y + 10, 3, x + 25, y + 12, 16);
   skinGradient.addColorStop(0, "#9b6a4f");
   skinGradient.addColorStop(1, "#5b3c2d");
@@ -269,28 +272,23 @@ function drawPlayer() {
   ctx.ellipse(x + 25, y + 12, 13, 15, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // Hairline
   ctx.fillStyle = "#201712";
   ctx.beginPath();
   ctx.ellipse(x + 25, y + 4, 11, 4, 0, Math.PI, 0);
   ctx.fill();
 
-  // Eyes + eyebrows
   ctx.fillStyle = "#111";
   ctx.fillRect(x + 19, y + 10, 3, 2);
   ctx.fillRect(x + 28, y + 10, 3, 2);
   ctx.fillRect(x + 18, y + 8, 4, 1);
   ctx.fillRect(x + 28, y + 8, 4, 1);
 
-  // Nose
   ctx.fillStyle = "rgba(40, 20, 12, 0.45)";
   ctx.fillRect(x + 24, y + 12, 2, 3);
 
-  // Beard / goatee detail
   ctx.fillStyle = "#1f1612";
   ctx.fillRect(x + 22, y + 16, 6, 2);
 
-  // Sunglasses for style
   ctx.fillStyle = "#0a0a0f";
   ctx.fillRect(x + 17, y + 9, 16, 4);
 }
@@ -301,25 +299,20 @@ function drawCactus(x, y, width, height) {
   const armWidth = Math.max(8, width * 0.28);
   const armHeight = height * 0.42;
 
-  // Main trunk
   ctx.fillStyle = bodyColor;
   ctx.fillRect(x + width * 0.28, y, width * 0.44, height);
 
-  // Left arm
   ctx.fillRect(x + width * 0.08, y + height * 0.3, armWidth, armHeight);
   ctx.fillRect(x + width * 0.08, y + height * 0.28, width * 0.22, armWidth * 0.65);
 
-  // Right arm
   ctx.fillRect(x + width * 0.7, y + height * 0.2, armWidth, armHeight);
   ctx.fillRect(x + width * 0.62, y + height * 0.18, width * 0.22, armWidth * 0.65);
 
-  // Highlights
   ctx.fillStyle = highlightColor;
   ctx.fillRect(x + width * 0.34, y + 6, width * 0.06, height - 12);
   ctx.fillRect(x + width * 0.14, y + height * 0.34, width * 0.05, armHeight - 4);
   ctx.fillRect(x + width * 0.76, y + height * 0.24, width * 0.05, armHeight - 4);
 
-  // Spikes
   ctx.strokeStyle = "#d6f5cf";
   ctx.lineWidth = 1;
   for (let i = 0; i < 6; i++) {
@@ -349,7 +342,6 @@ function drawBackground() {
   ctx.fillStyle = skyGradient;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // Sun glow
   const sunGlow = ctx.createRadialGradient(740, 85, 10, 740, 85, 110);
   sunGlow.addColorStop(0, "rgba(255, 211, 138, 0.85)");
   sunGlow.addColorStop(1, "rgba(255, 211, 138, 0)");
@@ -358,7 +350,6 @@ function drawBackground() {
   ctx.arc(740, 85, 110, 0, Math.PI * 2);
   ctx.fill();
 
-  // Distant hills
   ctx.fillStyle = "rgba(68, 36, 16, 0.55)";
   ctx.beginPath();
   ctx.moveTo(0, GROUND_Y);

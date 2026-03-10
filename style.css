@@ -46,25 +46,3 @@ canvas {
   font-size: 18px;
   color: #ffe6c5;
 }
-
-.controls {
-  margin-bottom: 12px;
-}
-
-#pauseBtn {
-  padding: 8px 16px;
-  border: 0;
-  border-radius: 999px;
-  background: #2f9c3f;
-  color: #fff;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-#pauseBtn:hover {
-  filter: brightness(1.08);
-}
-
-#pauseBtn:active {
-  transform: translateY(1px);
-}

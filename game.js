@@ -9,16 +9,20 @@ const GRAVITY = 0.8;
 const GROUND_Y = 320;
 const JUMP_FORCE = -14;
 const OBSTACLE_SPEED_START = 6;
-const MIN_OBSTACLE_GAP = 200;
-const MAX_OBSTACLE_GAP = 300;
+const MIN_OBSTACLE_GAP = 140;
+const MAX_OBSTACLE_GAP = 220;
 const SPEED_INCREASE_INTERVAL = 5;
 const SPEED_INCREASE_FACTOR = 1.12;
+const DECOR_SPEED_FACTOR = 0.4;
+const MIN_DECOR_GAP = 80;
+const MAX_DECOR_GAP = 150;
 
 let score = 0;
 let gameOver = false;
 let frameCount = 0;
 let obstacleSpeed = OBSTACLE_SPEED_START;
 let nextObstacleAt = MIN_OBSTACLE_GAP;
+let nextDecorAt = MIN_DECOR_GAP;
 let jumpQueued = false;
 
 const HIGH_SCORE_KEY = "mini_runner_high_score";
@@ -37,6 +41,7 @@ const player = {
 };
 
 const obstacles = [];
+const desertDecor = [];
 
 function resetGame() {
   score = 0;
@@ -44,7 +49,9 @@ function resetGame() {
   frameCount = 0;
   obstacleSpeed = OBSTACLE_SPEED_START;
   obstacles.length = 0;
+  desertDecor.length = 0;
   nextObstacleAt = MIN_OBSTACLE_GAP;
+  nextDecorAt = MIN_DECOR_GAP;
 
   player.y = GROUND_Y - player.height;
   player.velocityY = 0;
@@ -100,6 +107,21 @@ function spawnObstacle() {
   nextObstacleAt = frameCount + MIN_OBSTACLE_GAP + Math.random() * (MAX_OBSTACLE_GAP - MIN_OBSTACLE_GAP);
 }
 
+function spawnDesertDecor() {
+  const types = ["rock", "bush", "bones"];
+  const type = types[Math.floor(Math.random() * types.length)];
+  const scale = 0.7 + Math.random() * 0.8;
+
+  desertDecor.push({
+    x: canvas.width + 10,
+    y: GROUND_Y - (28 + Math.random() * 42),
+    type,
+    scale
+  });
+
+  nextDecorAt = frameCount + MIN_DECOR_GAP + Math.random() * (MAX_DECOR_GAP - MIN_DECOR_GAP);
+}
+
 function updatePlayer() {
   player.velocityY += GRAVITY;
   player.y += player.velocityY;
@@ -133,6 +155,17 @@ function updateObstacles() {
       if (score % SPEED_INCREASE_INTERVAL === 0) {
         obstacleSpeed *= SPEED_INCREASE_FACTOR;
       }
+    }
+  }
+}
+
+function updateDesertDecor() {
+  for (let i = desertDecor.length - 1; i >= 0; i--) {
+    const decor = desertDecor[i];
+    decor.x -= obstacleSpeed * DECOR_SPEED_FACTOR;
+
+    if (decor.x < -80) {
+      desertDecor.splice(i, 1);
     }
   }
 }
@@ -338,6 +371,74 @@ function drawBackground() {
   ctx.quadraticCurveTo(790, 255, 900, GROUND_Y);
   ctx.closePath();
   ctx.fill();
+
+  drawDesertDecor();
+}
+
+function drawRock(decor) {
+  const { x, y, scale } = decor;
+  const rockWidth = 24 * scale;
+  const rockHeight = 14 * scale;
+
+  ctx.fillStyle = "rgba(78, 51, 28, 0.85)";
+  ctx.beginPath();
+  ctx.ellipse(x, y, rockWidth, rockHeight, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = "rgba(116, 82, 51, 0.45)";
+  ctx.beginPath();
+  ctx.ellipse(x - rockWidth * 0.25, y - rockHeight * 0.15, rockWidth * 0.35, rockHeight * 0.25, -0.2, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawBush(decor) {
+  const { x, y, scale } = decor;
+  const w = 26 * scale;
+  const h = 16 * scale;
+
+  ctx.fillStyle = "rgba(103, 128, 66, 0.7)";
+  ctx.beginPath();
+  ctx.ellipse(x, y, w, h, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = "rgba(89, 110, 58, 0.75)";
+  ctx.beginPath();
+  ctx.ellipse(x - w * 0.35, y + h * 0.1, w * 0.4, h * 0.55, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(x + w * 0.32, y + h * 0.08, w * 0.35, h * 0.45, 0, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawBones(decor) {
+  const { x, y, scale } = decor;
+  const length = 28 * scale;
+
+  ctx.strokeStyle = "rgba(225, 214, 186, 0.85)";
+  ctx.lineWidth = 3 * scale;
+  ctx.lineCap = "round";
+
+  ctx.beginPath();
+  ctx.moveTo(x - length * 0.4, y + length * 0.2);
+  ctx.lineTo(x + length * 0.36, y - length * 0.16);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(x - length * 0.36, y - length * 0.16);
+  ctx.lineTo(x + length * 0.4, y + length * 0.2);
+  ctx.stroke();
+}
+
+function drawDesertDecor() {
+  for (const decor of desertDecor) {
+    if (decor.type === "rock") {
+      drawRock(decor);
+    } else if (decor.type === "bush") {
+      drawBush(decor);
+    } else {
+      drawBones(decor);
+    }
+  }
 }
 
 function gameLoop() {
@@ -351,10 +452,15 @@ function gameLoop() {
 
     updatePlayer();
     updateObstacles();
+    updateDesertDecor();
     detectCollisions();
 
     if (frameCount >= nextObstacleAt) {
       spawnObstacle();
+    }
+
+    if (frameCount >= nextDecorAt) {
+      spawnDesertDecor();
     }
   }
 

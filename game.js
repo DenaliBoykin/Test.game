@@ -13,6 +13,7 @@ const MIN_OBSTACLE_GAP = 140;
 const MAX_OBSTACLE_GAP = 220;
 const SPEED_INCREASE_INTERVAL = 5;
 const SPEED_INCREASE_FACTOR = 1.12;
+const MAX_OBSTACLES_ON_SCREEN = 2;
 const DECOR_SPEED_FACTOR = 0.4;
 const MIN_DECOR_GAP = 80;
 const MAX_DECOR_GAP = 150;
@@ -455,7 +456,7 @@ function gameLoop() {
     updateDesertDecor();
     detectCollisions();
 
-    if (frameCount >= nextObstacleAt) {
+    if (frameCount >= nextObstacleAt && obstacles.length < MAX_OBSTACLES_ON_SCREEN) {
       spawnObstacle();
     }
 

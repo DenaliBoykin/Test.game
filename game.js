@@ -17,8 +17,7 @@ let gameOver = false;
 let frameCount = 0;
 let obstacleSpeed = OBSTACLE_SPEED_START;
 let jumpQueued = false;
-let distanceSinceLastSpawn = 0;
-let nextObstacleTravelDistance = 0;
+let distanceUntilNextSpawn = 0;
 let lastObstacleWidth = 0;
 
 const HIGH_SCORE_KEY = "mini_runner_high_score";
@@ -45,7 +44,7 @@ function randomBetween(min, max) {
 function scheduleNextObstacleDistance() {
   const characterDistance = player.width;
   const desiredGap = randomBetween(MIN_OBSTACLE_GAP_CHARS, MAX_OBSTACLE_GAP_CHARS) * characterDistance;
-  nextObstacleTravelDistance = desiredGap + lastObstacleWidth;
+  distanceUntilNextSpawn = desiredGap + lastObstacleWidth;
 }
 
 function resetGame() {
@@ -55,7 +54,7 @@ function resetGame() {
   obstacleSpeed = OBSTACLE_SPEED_START;
   obstacles.length = 0;
   jumpQueued = false;
-  distanceSinceLastSpawn = 0;
+  distanceUntilNextSpawn = 0;
   lastObstacleWidth = 0;
   scheduleNextObstacleDistance();
 
@@ -147,17 +146,14 @@ function spawnObstacle() {
   const height = 58 + Math.random() * 12;
   const width = 36 + Math.random() * 14;
 
-  const obstacle = {
+  obstacles.push({
     x: canvas.width,
     y: GROUND_Y - height,
     width,
     height
-  };
-  obstacle.hitboxes = createCactusHitboxes(obstacle);
-  obstacles.push(obstacle);
+  });
 
   lastObstacleWidth = width;
-  distanceSinceLastSpawn = 0;
   scheduleNextObstacleDistance();
 }
 
@@ -210,7 +206,8 @@ function checkCollision(a, b) {
 
 function detectCollisions() {
   for (const obstacle of obstacles) {
-    for (const hitbox of obstacle.hitboxes) {
+    const hitboxes = createCactusHitboxes(obstacle);
+    for (const hitbox of hitboxes) {
       if (checkCollision(player, hitbox)) {
         gameOver = true;
         statusEl.textContent = "Game Over - Press Space to Restart";
@@ -375,8 +372,8 @@ function gameLoop() {
     updateObstacles();
     detectCollisions();
 
-    distanceSinceLastSpawn += obstacleSpeed;
-    if (distanceSinceLastSpawn >= nextObstacleTravelDistance) {
+    distanceUntilNextSpawn -= obstacleSpeed;
+    if (distanceUntilNextSpawn <= 0) {
       spawnObstacle();
     }
   }

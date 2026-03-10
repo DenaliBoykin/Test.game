@@ -5,8 +5,8 @@
 }
 
 body {
-  background: #111;
-  color: #fff;
+  background: radial-gradient(circle at top, #6b3f22, #2f1a0d 68%);
+  color: #fff7e8;
   font-family: Arial, sans-serif;
   display: flex;
   justify-content: center;
@@ -16,6 +16,10 @@ body {
 
 .game-wrapper {
   text-align: center;
+  padding: 18px;
+  border-radius: 16px;
+  background: rgba(28, 14, 8, 0.45);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
 }
 
 h1 {
@@ -24,12 +28,13 @@ h1 {
 
 p {
   margin-bottom: 12px;
-  color: #ccc;
+  color: #f1d9bd;
 }
 
 canvas {
-  background: #1e1e1e;
-  border: 3px solid #fff;
+  background: #5c361d;
+  border: 3px solid #ffe7bf;
+  border-radius: 10px;
   display: block;
 }
 
@@ -37,5 +42,7 @@ canvas {
   margin-top: 10px;
   display: flex;
   justify-content: space-between;
+  gap: 24px;
   font-size: 18px;
+  color: #ffe6c5;
 }

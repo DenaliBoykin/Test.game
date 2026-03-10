@@ -9,8 +9,10 @@ const GRAVITY = 0.8;
 const GROUND_Y = 320;
 const JUMP_FORCE = -14;
 const OBSTACLE_SPEED_START = 6;
-const MIN_OBSTACLE_GAP = 230;
-const MAX_OBSTACLE_GAP = 340;
+const MIN_OBSTACLE_GAP = 200;
+const MAX_OBSTACLE_GAP = 300;
+const SPEED_INCREASE_INTERVAL = 10;
+const SPEED_INCREASE_FACTOR = 1.08;
 
 let score = 0;
 let gameOver = false;
@@ -128,8 +130,8 @@ function updateObstacles() {
         highScoreEl.textContent = `High Score: ${highScore}`;
       }
 
-      if (score % 5 === 0) {
-        obstacleSpeed += 0.25;
+      if (score % SPEED_INCREASE_INTERVAL === 0) {
+        obstacleSpeed *= SPEED_INCREASE_FACTOR;
       }
     }
   }
@@ -192,22 +194,27 @@ function drawGround() {
 function drawPlayer() {
   const x = player.x;
   const y = player.y;
+  const isRunning = !player.jumping && !gameOver;
+  const runCycle = Math.sin(frameCount * 0.45);
+  const legSwing = isRunning ? runCycle * 4 : 0;
+  const shoeSwing = isRunning ? runCycle * 5 : 0;
+  const armSwing = isRunning ? -runCycle * 3 : 0;
 
   // Shadow
   ctx.fillStyle = "rgba(0, 0, 0, 0.35)";
   ctx.beginPath();
-  ctx.ellipse(x + 25, GROUND_Y + 5, 20, 7, 0, 0, Math.PI * 2);
+  ctx.ellipse(x + 25, GROUND_Y + 5, 20 + Math.abs(legSwing) * 0.5, 7, 0, 0, Math.PI * 2);
   ctx.fill();
 
   // Legs
   ctx.fillStyle = "#1f1f26";
-  ctx.fillRect(x + 12, y + 46, 11, 24);
-  ctx.fillRect(x + 27, y + 46, 11, 24);
+  ctx.fillRect(x + 12, y + 46 + legSwing, 11, 24 - legSwing);
+  ctx.fillRect(x + 27, y + 46 - legSwing, 11, 24 + legSwing);
 
   // Shoes
   ctx.fillStyle = "#f5f5f5";
-  ctx.fillRect(x + 10, y + 66, 14, 4);
-  ctx.fillRect(x + 25, y + 66, 14, 4);
+  ctx.fillRect(x + 10, y + 66 + shoeSwing, 14, 4);
+  ctx.fillRect(x + 25, y + 66 - shoeSwing, 14, 4);
 
   // Jacket
   const jacketGradient = ctx.createLinearGradient(x + 6, y + 22, x + 44, y + 48);
@@ -218,8 +225,8 @@ function drawPlayer() {
 
   // Arms
   ctx.fillStyle = "#5b3c2d";
-  ctx.fillRect(x + 4, y + 25, 6, 19);
-  ctx.fillRect(x + 40, y + 25, 6, 19);
+  ctx.fillRect(x + 4, y + 25 + armSwing, 6, 19);
+  ctx.fillRect(x + 40, y + 25 - armSwing, 6, 19);
 
   // Neck
   ctx.fillRect(x + 21, y + 18, 8, 6);

@@ -144,11 +144,30 @@ function checkCollision(a, b) {
   );
 }
 
+
+function getCactusHitboxes(obstacle) {
+  const { x, y, width, height } = obstacle;
+  const armWidth = Math.max(8, width * 0.28);
+  const armHeight = height * 0.42;
+
+  return [
+    { x: x + width * 0.28, y, width: width * 0.44, height },
+    { x: x + width * 0.08, y: y + height * 0.3, width: armWidth, height: armHeight },
+    { x: x + width * 0.08, y: y + height * 0.28, width: width * 0.22, height: armWidth * 0.65 },
+    { x: x + width * 0.7, y: y + height * 0.2, width: armWidth, height: armHeight },
+    { x: x + width * 0.62, y: y + height * 0.18, width: width * 0.22, height: armWidth * 0.65 }
+  ];
+}
+
 function detectCollisions() {
   for (const obstacle of obstacles) {
-    if (checkCollision(player, obstacle)) {
+    const cactusHitboxes = getCactusHitboxes(obstacle);
+    const hit = cactusHitboxes.some((hitbox) => checkCollision(player, hitbox));
+
+    if (hit) {
       gameOver = true;
       statusEl.textContent = "Game Over - Press Space to Restart";
+      break;
     }
   }
 }

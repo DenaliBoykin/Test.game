@@ -1,32 +1,37 @@
 const pauseBtn = document.getElementById("pauseBtn");
+const statusEl = document.getElementById("status");
 
-function syncPauseButton(paused, gameOver) {
-  if (gameOver) {
+function updatePauseUI() {
+  if (statusEl.textContent.startsWith("Game Over")) {
     pauseBtn.textContent = "Pause";
     pauseBtn.disabled = true;
     return;
   }
 
   pauseBtn.disabled = false;
-  pauseBtn.textContent = paused ? "Resume" : "Pause";
+  pauseBtn.textContent = window.__runnerPaused ? "Resume" : "Pause";
 }
 
-pauseBtn.addEventListener("click", () => {
-  if (!window.runnerGame) {
+function togglePause() {
+  if (statusEl.textContent.startsWith("Game Over")) {
     return;
   }
 
-  window.runnerGame.togglePause();
-});
+  window.__runnerPaused = !window.__runnerPaused;
+  statusEl.textContent = window.__runnerPaused ? "Paused" : "Running";
+  updatePauseUI();
+}
+
+pauseBtn.addEventListener("click", togglePause);
 
 document.addEventListener("keydown", (e) => {
-  if (e.code === "KeyP" && window.runnerGame) {
+  if (e.code === "KeyP") {
     e.preventDefault();
-    window.runnerGame.togglePause();
+    togglePause();
   }
 });
 
-window.addEventListener("runner:state", (e) => {
-  const { paused, gameOver } = e.detail;
-  syncPauseButton(paused, gameOver);
-});
+const observer = new MutationObserver(updatePauseUI);
+observer.observe(statusEl, { childList: true, subtree: true, characterData: true });
+
+updatePauseUI();

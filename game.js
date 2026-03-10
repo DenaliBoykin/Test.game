@@ -18,7 +18,6 @@ let frameCount = 0;
 let obstacleSpeed = OBSTACLE_SPEED_START;
 let nextObstacleAt = MIN_OBSTACLE_GAP;
 let jumpQueued = false;
-let paused = false;
 let runCycle = 0;
 
 const HIGH_SCORE_KEY = "mini_runner_high_score";
@@ -37,18 +36,7 @@ const player = {
 };
 
 const obstacles = [];
-
-function publishGameState() {
-  window.dispatchEvent(
-    new CustomEvent("runner:state", {
-      detail: {
-        paused,
-        gameOver,
-        status: statusEl.textContent
-      }
-    })
-  );
-}
+window.__runnerPaused = false;
 
 function resetGame() {
   score = 0;
@@ -57,7 +45,7 @@ function resetGame() {
   obstacleSpeed = OBSTACLE_SPEED_START;
   obstacles.length = 0;
   nextObstacleAt = MIN_OBSTACLE_GAP;
-  paused = false;
+  window.__runnerPaused = false;
   runCycle = 0;
 
   player.y = GROUND_Y - player.height;
@@ -67,31 +55,9 @@ function resetGame() {
   scoreEl.textContent = "Score: 0";
   highScoreEl.textContent = `High Score: ${highScore}`;
   statusEl.textContent = "Running";
-  publishGameState();
 }
-
-function togglePause() {
-  if (gameOver) {
-    return false;
-  }
-
-  paused = !paused;
-  statusEl.textContent = paused ? "Paused" : "Running";
-  publishGameState();
-  return paused;
-}
-
-window.runnerGame = {
-  togglePause,
-  isPaused: () => paused,
-  isGameOver: () => gameOver
-};
 
 function jump() {
-  if (paused) {
-    return;
-  }
-
   if (gameOver) {
     resetGame();
     return;
@@ -105,10 +71,6 @@ function jump() {
 }
 
 function queueJump() {
-  if (paused) {
-    return;
-  }
-
   jumpQueued = true;
   jump();
 }
@@ -207,9 +169,8 @@ function detectCollisions() {
 
     if (hit) {
       gameOver = true;
-      paused = false;
+      window.__runnerPaused = false;
       statusEl.textContent = "Game Over - Press Space to Restart";
-      publishGameState();
       break;
     }
   }
@@ -235,7 +196,7 @@ function drawGround() {
 function drawPlayer() {
   const x = player.x;
   const y = player.y;
-  const isRunning = !player.jumping && !paused && !gameOver;
+  const isRunning = !player.jumping && !window.__runnerPaused && !gameOver;
   const legOffset = isRunning ? Math.sin(runCycle) * 4 : 0;
   const armOffset = isRunning ? Math.cos(runCycle) * 3 : 0;
 
@@ -366,7 +327,7 @@ function gameLoop() {
   drawPlayer();
   drawObstacles();
 
-  if (!gameOver && !paused) {
+  if (!gameOver && !window.__runnerPaused) {
     frameCount++;
     runCycle += 0.25;
 

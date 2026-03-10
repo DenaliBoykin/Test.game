@@ -59,7 +59,6 @@ function resetGame() {
   pauseBtn.textContent = "Pause";
 }
 
-
 function togglePause() {
   if (gameOver) {
     return;
@@ -102,19 +101,18 @@ document.addEventListener("keydown", (e) => {
   if (e.code === "Space") {
     e.preventDefault();
     queueJump();
+    return;
+  }
+
+  if (e.code === "KeyP") {
+    e.preventDefault();
+    togglePause();
   }
 });
 
 document.addEventListener("keyup", (e) => {
   if (e.code === "Space") {
     jumpQueued = false;
-  }
-});
-
-document.addEventListener("keydown", (e) => {
-  if (e.code === "KeyP") {
-    e.preventDefault();
-    togglePause();
   }
 });
 
@@ -177,7 +175,6 @@ function checkCollision(a, b) {
     a.y + a.height > b.y
   );
 }
-
 
 function getCactusHitboxes(obstacle) {
   const { x, y, width, height } = obstacle;

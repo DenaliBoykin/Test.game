@@ -47,7 +47,6 @@ canvas {
   color: #ffe6c5;
 }
 
-
 .controls {
   margin-bottom: 12px;
 }
@@ -64,4 +63,8 @@ canvas {
 
 #pauseBtn:hover {
   filter: brightness(1.08);
+}
+
+#pauseBtn:active {
+  transform: translateY(1px);
 }

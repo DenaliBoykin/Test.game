@@ -231,8 +231,8 @@ function drawPlayer() {
   const isRunning = !player.jumping && !gameOver;
   const runCycle = Math.sin(frameCount * 0.45);
   const legSwing = isRunning ? runCycle * 4 : 0;
-  const shoeSwing = isRunning ? runCycle * 5 : 0;
-  const armSwing = isRunning ? -runCycle * 3 : 0;
+  const shoeSwing = isRunning ? runCycle * 2.4 : 0;
+  const armSwing = isRunning ? -runCycle * 4 : 0;
 
   // Shadow
   ctx.fillStyle = "rgba(0, 0, 0, 0.35)";
@@ -240,30 +240,56 @@ function drawPlayer() {
   ctx.ellipse(x + 25, GROUND_Y + 5, 20 + Math.abs(legSwing) * 0.5, 7, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // Legs
-  ctx.fillStyle = "#1f1f26";
-  ctx.fillRect(x + 12, y + 46 + legSwing, 11, 24 - legSwing);
-  ctx.fillRect(x + 27, y + 46 - legSwing, 11, 24 + legSwing);
-
-  // Shoes
-  ctx.fillStyle = "#f5f5f5";
-  ctx.fillRect(x + 10, y + 66 + shoeSwing, 14, 4);
-  ctx.fillRect(x + 25, y + 66 - shoeSwing, 14, 4);
-
-  // Jacket
+  // Torso / jacket
   const jacketGradient = ctx.createLinearGradient(x + 6, y + 22, x + 44, y + 48);
   jacketGradient.addColorStop(0, "#f7f7f7");
   jacketGradient.addColorStop(1, "#d8d8d8");
   ctx.fillStyle = jacketGradient;
-  ctx.fillRect(x + 8, y + 22, 34, 26);
-
-  // Arms
-  ctx.fillStyle = "#5b3c2d";
-  ctx.fillRect(x + 4, y + 25 + armSwing, 6, 19);
-  ctx.fillRect(x + 40, y + 25 - armSwing, 6, 19);
+  ctx.beginPath();
+  ctx.roundRect(x + 8, y + 22, 34, 27, 10);
+  ctx.fill();
 
   // Neck
-  ctx.fillRect(x + 21, y + 18, 8, 6);
+  ctx.fillStyle = "#7d523c";
+  ctx.beginPath();
+  ctx.roundRect(x + 21, y + 18, 8, 7, 3);
+  ctx.fill();
+
+  // Arms
+  ctx.fillStyle = "#6b4633";
+  ctx.beginPath();
+  ctx.roundRect(x + 4, y + 24 + armSwing, 8, 21, 4);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.roundRect(x + 38, y + 24 - armSwing, 8, 21, 4);
+  ctx.fill();
+
+  // Hands
+  ctx.fillStyle = "#8a5d44";
+  ctx.beginPath();
+  ctx.arc(x + 8, y + 45 + armSwing, 3.2, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(x + 42, y + 45 - armSwing, 3.2, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Legs
+  ctx.fillStyle = "#1f1f26";
+  ctx.beginPath();
+  ctx.roundRect(x + 12, y + 47 + legSwing, 11, 22 - legSwing, 5);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.roundRect(x + 27, y + 47 - legSwing, 11, 22 + legSwing, 5);
+  ctx.fill();
+
+  // Shoes
+  ctx.fillStyle = "#efefef";
+  ctx.beginPath();
+  ctx.ellipse(x + 17, y + 69 + shoeSwing, 8.5, 3.5, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(x + 32, y + 69 - shoeSwing, 8.5, 3.5, 0, 0, Math.PI * 2);
+  ctx.fill();
 
   // Head
   const skinGradient = ctx.createRadialGradient(x + 24, y + 10, 3, x + 25, y + 12, 16);
@@ -274,30 +300,51 @@ function drawPlayer() {
   ctx.ellipse(x + 25, y + 12, 13, 15, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // Hairline
+  // Hair
   ctx.fillStyle = "#201712";
   ctx.beginPath();
-  ctx.ellipse(x + 25, y + 4, 11, 4, 0, Math.PI, 0);
+  ctx.ellipse(x + 25, y + 5, 11, 4, 0, Math.PI, 0);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(x + 25, y + 6, 8, 2.2, 0, 0, Math.PI * 2);
   ctx.fill();
 
   // Eyes + eyebrows
-  ctx.fillStyle = "#111";
-  ctx.fillRect(x + 19, y + 10, 3, 2);
-  ctx.fillRect(x + 28, y + 10, 3, 2);
-  ctx.fillRect(x + 18, y + 8, 4, 1);
-  ctx.fillRect(x + 28, y + 8, 4, 1);
+  ctx.fillStyle = "#261a15";
+  ctx.beginPath();
+  ctx.arc(x + 20.5, y + 10.8, 1.35, 0, Math.PI * 2);
+  ctx.arc(x + 29.5, y + 10.8, 1.35, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = "#2a1c16";
+  ctx.lineWidth = 1.1;
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.moveTo(x + 18.3, y + 8.8);
+  ctx.quadraticCurveTo(x + 20.4, y + 7.8, x + 22.2, y + 8.7);
+  ctx.moveTo(x + 27.9, y + 8.7);
+  ctx.quadraticCurveTo(x + 29.7, y + 7.8, x + 31.8, y + 8.8);
+  ctx.stroke();
 
   // Nose
-  ctx.fillStyle = "rgba(40, 20, 12, 0.45)";
-  ctx.fillRect(x + 24, y + 12, 2, 3);
+  ctx.strokeStyle = "rgba(64, 37, 24, 0.55)";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(x + 25, y + 11.7);
+  ctx.quadraticCurveTo(x + 26.2, y + 13.3, x + 24.8, y + 14.9);
+  ctx.stroke();
 
-  // Beard / goatee detail
-  ctx.fillStyle = "#1f1612";
-  ctx.fillRect(x + 22, y + 16, 6, 2);
+  // Mouth
+  ctx.strokeStyle = "rgba(75, 34, 25, 0.6)";
+  ctx.beginPath();
+  ctx.quadraticCurveTo(x + 22, y + 17.8, x + 28, y + 17.8);
+  ctx.stroke();
 
-  // Sunglasses for style
-  ctx.fillStyle = "#0a0a0f";
-  ctx.fillRect(x + 17, y + 9, 16, 4);
+  // Cheek highlights
+  ctx.fillStyle = "rgba(214, 149, 118, 0.2)";
+  ctx.beginPath();
+  ctx.ellipse(x + 18.5, y + 15.8, 2.6, 1.2, -0.2, 0, Math.PI * 2);
+  ctx.ellipse(x + 31.5, y + 15.8, 2.6, 1.2, 0.2, 0, Math.PI * 2);
+  ctx.fill();
 }
 
 function drawCactus(x, y, width, height) {
